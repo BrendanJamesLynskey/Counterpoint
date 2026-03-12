@@ -79,11 +79,11 @@ const ScoreRenderer = (() => {
   // Clef SVG alignment parameters (SVG-coordinate values)
   const TREBLE = {
     vbX: 100, vbY: -700, vbW: 920, vbH: 2600,
-    staffTop: 200, staffH: 900, anchorX: 500
+    staffTop: 200, staffH: 1200, anchorX: 500
   };
   const BASS = {
     vbX: 1400, vbY: 400, vbW: 6200, vbH: 7100,
-    staffTop: 2578, staffH: 8606, anchorX: 2000
+    staffTop: 4729, staffH: 7172, anchorX: 2000
   };
 
   function drawTrebleClef(x, staffTopY) {
