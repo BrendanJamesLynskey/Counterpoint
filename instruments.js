@@ -1,17 +1,80 @@
 /**
  * Instrument synthesis using Web Audio API.
  * Each instrument is defined by oscillator types, envelopes, and filtering.
+ * A convolution reverb is applied to the master output.
  */
 const Instruments = (() => {
   let audioCtx = null;
   let masterGain = null;
+  let reverbNode = null;
+  let dryGain = null;
+  let wetGain = null;
+
+  // Reverb parameters
+  const REVERB_TIME = 2.2;   // seconds of tail
+  const REVERB_DECAY = 2.8;  // decay rate (higher = faster fade)
+  const DRY_LEVEL = 0.7;
+  const WET_LEVEL = 0.35;
+
+  /**
+   * Generate a synthetic impulse response: stereo exponentially-decaying
+   * filtered noise that simulates a medium hall.
+   */
+  function createImpulseResponse(ctx) {
+    const rate = ctx.sampleRate;
+    const length = Math.floor(rate * REVERB_TIME);
+    const impulse = ctx.createBuffer(2, length, rate);
+
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        // Exponentially decaying white noise
+        const envelope = Math.exp(-i / (rate / REVERB_DECAY));
+        // Shape the early reflections: slight initial buildup
+        const earlyGain = i < rate * 0.01 ? i / (rate * 0.01) : 1;
+        data[i] = (Math.random() * 2 - 1) * envelope * earlyGain;
+      }
+
+      // Simple low-pass smoothing to darken the tail (air absorption)
+      // Two-pass moving average
+      for (let pass = 0; pass < 2; pass++) {
+        let prev = 0;
+        const damping = 0.6;
+        for (let i = 0; i < length; i++) {
+          data[i] = prev + damping * (data[i] - prev);
+          prev = data[i];
+        }
+      }
+    }
+
+    return impulse;
+  }
 
   function getContext() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Build signal chain:
+      // instruments → masterGain ──┬── dryGain ────────→ destination
+      //                            └── convolver → wetGain → destination
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.35;
-      masterGain.connect(audioCtx.destination);
+
+      dryGain = audioCtx.createGain();
+      dryGain.gain.value = DRY_LEVEL;
+
+      wetGain = audioCtx.createGain();
+      wetGain.gain.value = WET_LEVEL;
+
+      reverbNode = audioCtx.createConvolver();
+      reverbNode.buffer = createImpulseResponse(audioCtx);
+
+      masterGain.connect(dryGain);
+      dryGain.connect(audioCtx.destination);
+
+      masterGain.connect(reverbNode);
+      reverbNode.connect(wetGain);
+      wetGain.connect(audioCtx.destination);
     }
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
@@ -66,7 +129,6 @@ const Instruments = (() => {
 
     'harpsichord': {
       create(freq, duration, ctx, dest, velocity = 0.7) {
-        // Bright, plucked sound with quick decay
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const osc3 = ctx.createOscillator();
@@ -78,7 +140,7 @@ const Instruments = (() => {
         osc2.type = 'square';
         osc2.frequency.value = freq;
         osc3.type = 'sawtooth';
-        osc3.frequency.value = freq * 2.0; // octave above for brightness
+        osc3.frequency.value = freq * 2.0;
 
         filter.type = 'lowpass';
         filter.frequency.value = Math.min(freq * 10, 12000);
@@ -93,7 +155,6 @@ const Instruments = (() => {
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.8);
         gain.gain.linearRampToValueAtTime(0, now + duration);
 
-        // Frequency-dependent decay on filter
         filter.frequency.setValueAtTime(Math.min(freq * 10, 12000), now);
         filter.frequency.exponentialRampToValueAtTime(Math.max(freq * 2, 200), now + duration * 0.7);
 
@@ -119,7 +180,6 @@ const Instruments = (() => {
 
     'church-organ': {
       create(freq, duration, ctx, dest, velocity = 0.7) {
-        // Full organ: fundamental + multiple harmonics, sustained
         const harmonics = [1, 2, 3, 4, 5, 6, 8];
         const levels =    [0.5, 0.35, 0.2, 0.15, 0.1, 0.06, 0.04];
         const gain = ctx.createGain();
@@ -159,7 +219,6 @@ const Instruments = (() => {
 
     'baroque-organ': {
       create(freq, duration, ctx, dest, velocity = 0.7) {
-        // Brighter, more "principal" sound with mixture-like upper partials
         const harmonics = [1, 2, 3, 4, 6, 8];
         const levels =    [0.4, 0.4, 0.25, 0.2, 0.12, 0.08];
         const gain = ctx.createGain();
@@ -185,7 +244,6 @@ const Instruments = (() => {
           oscs.push(osc);
         });
 
-        // Add slight chorusing
         const chorusOsc = ctx.createOscillator();
         const chorusGain = ctx.createGain();
         chorusOsc.type = 'sine';
@@ -204,7 +262,6 @@ const Instruments = (() => {
 
     'reed-organ': {
       create(freq, duration, ctx, dest, velocity = 0.7) {
-        // Reed-like: square waves with filtering for nasal quality
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -214,9 +271,8 @@ const Instruments = (() => {
         osc1.type = 'square';
         osc1.frequency.value = freq;
         osc2.type = 'sawtooth';
-        osc2.frequency.value = freq * 1.001; // slight detune
+        osc2.frequency.value = freq * 1.001;
 
-        // Nasal / reedy quality via bandpass
         filter.type = 'bandpass';
         filter.frequency.value = freq * 3;
         filter.Q.value = 2;
@@ -232,7 +288,6 @@ const Instruments = (() => {
         gain.gain.setValueAtTime(amp, now + duration - 0.12);
         gain.gain.linearRampToValueAtTime(0, now + duration);
 
-        // Slight vibrato
         const lfo = ctx.createOscillator();
         const lfoGain = ctx.createGain();
         lfo.frequency.value = 5;
@@ -265,7 +320,6 @@ const Instruments = (() => {
 
     'flute-organ': {
       create(freq, duration, ctx, dest, velocity = 0.7) {
-        // Gentle, pure flute stop: mostly sine with breath noise
         const osc = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -314,11 +368,13 @@ const Instruments = (() => {
   }
 
   function stopAll() {
-    // Close and recreate on next use, so scheduled notes are silenced
     if (audioCtx) {
       try { audioCtx.close(); } catch(e) {}
       audioCtx = null;
       masterGain = null;
+      reverbNode = null;
+      dryGain = null;
+      wetGain = null;
     }
   }
 
