@@ -66,38 +66,51 @@ const MusicTheory = (() => {
   // pitch class (C=0 through B=11).  A440 is the reference pitch.
 
   let currentTuning = 'equal';
+  let currentKeyRoot = 0; // pitch class of current key (0=C)
 
+  // Tuning definitions: offsets in cents from equal temperament,
+  // defined relative to C.  Key-relative tunings (just, pythagorean)
+  // are rotated at playback time to match the current key.
   const TUNINGS = {
     'equal': {
       name: 'Equal Temperament',
+      keyRelative: false,
       offsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     },
     'just-major': {
       name: 'Just Intonation (Major)',
-      // C=1/1, D=9/8, E=5/4, F=4/3, G=3/2, A=5/3, B=15/8
-      // Cents from ET: 0, 0, +3.91, -13.69, -0.00, +1.96, +15.64, -13.69, 0, -15.64, +17.60, -11.73
-      offsets: [0, 0, 3.91, -15.64, -13.69, -1.96, 0, 1.96, -13.69, -15.64, 17.60, -11.73]
+      keyRelative: true,
+      // Ratios: 1/1 16/15 9/8 6/5 5/4 4/3 45/32 3/2 8/5 5/3 9/5 15/8
+      offsets: [0, 11.73, 3.91, 15.64, -13.69, -1.96, -10.26, 1.96, 13.69, -15.64, 17.60, -11.73]
+    },
+    'just-minor': {
+      name: 'Just Intonation (Minor)',
+      keyRelative: true,
+      // Ratios: 1/1 16/15 9/8 6/5 5/4 4/3 7/5 3/2 8/5 5/3 7/4 15/8
+      offsets: [0, 11.73, 3.91, 15.64, -13.69, -1.96, -17.49, 1.96, 13.69, -15.64, -31.17, -11.73]
     },
     'pythagorean': {
       name: 'Pythagorean',
+      keyRelative: true,
       // Built on pure fifths (3:2). Cents from ET:
-      // C=0, C#=-9.78, D=+3.91, Eb=-5.87, E=+7.82, F=-1.96,
-      // F#=+11.73, G=+1.96, G#=-7.82, A=+5.87, Bb=-3.91, B=+9.78
       offsets: [0, -9.78, 3.91, -5.87, 7.82, -1.96, 11.73, 1.96, -7.82, 5.87, -3.91, 9.78]
     },
     'meantone': {
       name: 'Quarter-Comma Meantone',
+      keyRelative: true,
       // Pure major thirds (5:4), tempered fifths. Cents from ET:
       offsets: [0, -24.04, -6.84, 10.26, -13.69, 3.42, -20.53, -3.42, -27.37, -10.26, 6.84, -17.11]
     },
     'werckmeister': {
       name: 'Werckmeister III',
-      // Well temperament (1691). Cents from ET:
+      keyRelative: false,
+      // Well temperament (1691). Different keys have different colours.
       offsets: [0, -9.78, -7.82, -5.87, -3.91, -1.96, -9.78, -3.91, -7.82, -5.87, -3.91, -1.96]
     },
     'kirnberger': {
       name: 'Kirnberger III',
-      // Well temperament blending just and Pythagorean. Cents from ET:
+      keyRelative: false,
+      // Well temperament blending just and Pythagorean.
       offsets: [0, -9.78, -6.84, -5.87, -13.69, -1.96, -9.78, -3.91, -7.82, -10.26, -3.91, -11.73]
     }
   };
@@ -106,10 +119,22 @@ const MusicTheory = (() => {
     if (TUNINGS[name]) currentTuning = name;
   }
 
+  function setTuningKeyRoot(root) {
+    currentKeyRoot = ((root % 12) + 12) % 12;
+  }
+
   function midiToFrequency(midi) {
-    const offsets = TUNINGS[currentTuning].offsets;
+    const tuning = TUNINGS[currentTuning];
+    const offsets = tuning.offsets;
     const pc = ((midi % 12) + 12) % 12;
-    const cents = offsets[pc];
+    let cents;
+    if (tuning.keyRelative) {
+      // Rotate offsets so the current key root is the reference
+      const interval = ((pc - currentKeyRoot) % 12 + 12) % 12;
+      cents = offsets[interval];
+    } else {
+      cents = offsets[pc];
+    }
     return 440 * Math.pow(2, (midi - 69) / 12 + cents / 1200);
   }
 
@@ -246,6 +271,6 @@ const MusicTheory = (() => {
     getScalePitches, getScaleTonesInRange, getScaleDegree,
     intervalBetween, motionType,
     midiToDiatonic, getNoteAccidental, getKeySigInfo,
-    TUNINGS, setTuning
+    TUNINGS, setTuning, setTuningKeyRoot
   };
 })();

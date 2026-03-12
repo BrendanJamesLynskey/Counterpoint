@@ -135,6 +135,7 @@
     const key = keySel.value;
     const numVoices = parseInt(voicesSel.value);
     piece = Counterpoint.generate(key, numVoices);
+    MusicTheory.setTuningKeyRoot(piece.key.rootPc);
     currentBeat = -1;
     ScoreRenderer.render(piece, -1);
     updateAnalysis(-1);
