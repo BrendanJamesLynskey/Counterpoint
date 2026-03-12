@@ -18,11 +18,33 @@ const ScoreRenderer = (() => {
   let currentPiece = null;
   let playheadBeat = -1;
 
+  // Clef images (loaded from SVG files)
+  let trebleClefImg = null;
+  let bassClefImg = null;
+  let clefsLoaded = false;
+
+  function loadClefImages() {
+    let loaded = 0;
+    const onLoad = () => {
+      if (++loaded === 2) {
+        clefsLoaded = true;
+        if (currentPiece) render(currentPiece, playheadBeat);
+      }
+    };
+    trebleClefImg = new Image();
+    trebleClefImg.onload = onLoad;
+    trebleClefImg.src = 'treble-clef.svg';
+    bassClefImg = new Image();
+    bassClefImg.onload = onLoad;
+    bassClefImg.src = 'bass-clef.svg';
+  }
+
   // ── init / resize ─────────────────────────────────────────────────
 
   function init(canvasEl) {
     canvas = canvasEl;
     ctx = canvas.getContext('2d');
+    loadClefImages();
     resize();
     window.addEventListener('resize', resize);
   }
@@ -55,116 +77,21 @@ const ScoreRenderer = (() => {
   // ── draw helpers ──────────────────────────────────────────────────
 
   function drawTrebleClef(x, staffTopY) {
-    const g = GAP;
-    ctx.save();
-    ctx.strokeStyle = '#444';
-    ctx.fillStyle = '#444';
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Draw the treble clef as a continuous bezier path
-    // G line is at staffTopY + 3*g (second staff line from bottom)
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-
-    // Start from the bottom curl, below the staff
-    ctx.moveTo(x + g * 0.15, staffTopY + g * 5.0);
-
-    // Bottom curl: sweep left and up
-    ctx.bezierCurveTo(
-      x - g * 0.7, staffTopY + g * 4.9,
-      x - g * 0.65, staffTopY + g * 4.0,
-      x + g * 0.05, staffTopY + g * 3.7
-    );
-
-    // Rise up through the right side of the staff
-    ctx.bezierCurveTo(
-      x + g * 0.9, staffTopY + g * 3.2,
-      x + g * 1.1, staffTopY + g * 1.8,
-      x + g * 0.7, staffTopY + g * 0.4
-    );
-
-    // Curve over the top of the staff
-    ctx.bezierCurveTo(
-      x + g * 0.3, staffTopY - g * 0.5,
-      x - g * 0.7, staffTopY - g * 0.2,
-      x - g * 0.55, staffTopY + g * 0.8
-    );
-
-    // Descend back through the left side, crossing G line
-    ctx.bezierCurveTo(
-      x - g * 0.35, staffTopY + g * 1.7,
-      x + g * 0.1, staffTopY + g * 2.5,
-      x + g * 0.1, staffTopY + g * 3.0
-    );
-
-    ctx.stroke();
-
-    // Vertical spine from top crossing down through the staff
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.moveTo(x + g * 0.1, staffTopY + g * 3.0);
-    ctx.lineTo(x + g * 0.1, staffTopY + g * 4.85);
-    ctx.stroke();
-
-    // Vertical line extending above the top of the staff
-    ctx.beginPath();
-    ctx.moveTo(x + g * 0.35, staffTopY + g * 0.2);
-    ctx.lineTo(x + g * 0.35, staffTopY - g * 0.7);
-    ctx.stroke();
-
-    // Bottom dot
-    ctx.beginPath();
-    ctx.arc(x + g * 0.1, staffTopY + g * 5.0, 2.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
+    if (!clefsLoaded) return;
+    // SVG viewBox: 26×86, staff occupies y=15..55 (height 40)
+    const scale = (4 * GAP) / 40;
+    ctx.drawImage(trebleClefImg,
+      x - 13 * scale, staffTopY - 15 * scale,
+      26 * scale, 86 * scale);
   }
 
   function drawBassClef(x, staffTopY) {
-    const g = GAP;
-    ctx.save();
-    ctx.strokeStyle = '#444';
-    ctx.fillStyle = '#444';
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Main dot on F line (4th line = staffTopY + g)
-    ctx.beginPath();
-    ctx.arc(x, staffTopY + g * 0.9, g * 0.38, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Body curve: from F line area sweeping right and down
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.moveTo(x + g * 0.4, staffTopY + g * 0.5);
-
-    // Curve up and right toward top of staff
-    ctx.bezierCurveTo(
-      x + g * 0.9, staffTopY - g * 0.2,
-      x + g * 1.4, staffTopY + g * 0.3,
-      x + g * 1.3, staffTopY + g * 1.2
-    );
-
-    // Curve down and back toward bottom
-    ctx.bezierCurveTo(
-      x + g * 1.2, staffTopY + g * 2.3,
-      x + g * 0.5, staffTopY + g * 3.2,
-      x - g * 0.2, staffTopY + g * 3.8
-    );
-
-    ctx.stroke();
-
-    // Two dots flanking the F line
-    const dotR = 1.7;
-    ctx.beginPath();
-    ctx.arc(x + g * 1.5, staffTopY + g * 0.5, dotR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x + g * 1.5, staffTopY + g * 1.5, dotR, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
+    if (!clefsLoaded) return;
+    // SVG viewBox: 30×48, staff occupies y=4..44 (height 40)
+    const scale = (4 * GAP) / 40;
+    ctx.drawImage(bassClefImg,
+      x - 6 * scale, staffTopY - 4 * scale,
+      30 * scale, 48 * scale);
   }
 
   function drawKeySig(startX, staffTopY, clef, keySig) {
@@ -243,7 +170,7 @@ const ScoreRenderer = (() => {
     const marginRight = 20;
     const marginTop = 28;
     const labelW = 28;
-    const clefW = 22;
+    const clefW = 26;
     const timeSigW = 18;
     const prefixW = labelW + clefW + keySigWidth + timeSigW + 10;
     const staffHeight = 4 * GAP;

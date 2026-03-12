@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 86">
+  <g fill="none" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Vertical spine -->
+    <line x1="13" y1="3" x2="13" y2="74" stroke-width="2"/>
+    <!-- S-curve: lower-left bulge up through upper-right, over the top, back to center -->
+    <path d="M 13 62 C 5 56, 0 42, 4 30 C 8 18, 16 8, 22 14 C 28 20, 24 42, 13 48" stroke-width="2.8"/>
+    <!-- Bottom curl -->
+    <path d="M 13 74 C 8 77, 4 76, 4 73 C 4 70, 8 68, 12 71" stroke-width="2"/>
+  </g>
+  <circle cx="12" cy="77" r="2" fill="#333"/>
+</svg>

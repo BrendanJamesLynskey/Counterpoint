@@ -132,6 +132,12 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .btn-play:hover:not(:disabled) { background: #40916c; }
 
+.btn-step {
+  background: #2d5a6a;
+  color: #e0e0e0;
+}
+.btn-step:hover:not(:disabled) { background: #3d7a8a; }
+
 .btn-stop {
   background: #9b2226;
   color: #e0e0e0;

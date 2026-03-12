@@ -16,6 +16,7 @@
   const tempoSlider = document.getElementById('tempo');
   const tempoDisplay = document.getElementById('tempo-display');
   const playBtn = document.getElementById('play-btn');
+  const stepBtn = document.getElementById('step-btn');
   const stopBtn = document.getElementById('stop-btn');
   const generateBtn = document.getElementById('generate-btn');
   const continuousChk = document.getElementById('continuous');
@@ -41,6 +42,7 @@
   });
 
   playBtn.addEventListener('click', startPlayback);
+  stepBtn.addEventListener('click', stepBeat);
   stopBtn.addEventListener('click', stopPlayback);
   generateBtn.addEventListener('click', () => {
     stopPlayback();
@@ -142,6 +144,7 @@
     isPlaying = true;
     currentBeat = -1;
     playBtn.disabled = true;
+    stepBtn.disabled = true;
     stopBtn.disabled = false;
     generateBtn.disabled = true;
     playNextBeat();
@@ -155,10 +158,42 @@
     }
     Instruments.stopAll();
     playBtn.disabled = false;
+    stepBtn.disabled = false;
     stopBtn.disabled = true;
     generateBtn.disabled = false;
     currentBeat = -1;
     if (piece) ScoreRenderer.render(piece, -1);
+  }
+
+  function stepBeat() {
+    if (isPlaying) stopPlayback();
+    if (!piece) return;
+    Instruments.getContext();
+
+    currentBeat++;
+    if (currentBeat >= piece.length) {
+      currentBeat = -1;
+      if (piece) ScoreRenderer.render(piece, -1);
+      updateAnalysis(-1);
+      return;
+    }
+
+    const instrument = instrumentSel.value;
+    const beatDuration = 60 / tempo;
+
+    for (let v = 0; v < piece.voices.length; v++) {
+      const voice = piece.voices[v];
+      const dur = voice.durations[currentBeat];
+      if (dur > 0) {
+        const midi = voice.notes[currentBeat];
+        const noteDuration = beatDuration * dur - 0.05;
+        const velocity = v === 0 ? 0.75 : (v === piece.voices.length - 1 ? 0.7 : 0.6);
+        Instruments.playNote(instrument, midi, Math.max(noteDuration, 0.1), velocity);
+      }
+    }
+
+    ScoreRenderer.render(piece, currentBeat);
+    updateAnalysis(currentBeat);
   }
 
   function playNextBeat() {
