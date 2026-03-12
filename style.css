@@ -145,6 +145,15 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .btn-generate:hover { background: #1a4a8a; }
 
+.btn-fullscreen {
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #1a4a8a;
+  font-size: 1.1rem;
+  padding: 8px 14px;
+}
+.btn-fullscreen:hover { background: #1a4a8a; }
+
 main {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -250,6 +259,50 @@ main {
 .playhead-indicator {
   color: #e8d5b7;
   font-weight: bold;
+}
+
+/* ── Fullscreen mode ────────────────────────────────── */
+
+#app:fullscreen,
+#app:-webkit-full-screen {
+  background: #1a1a2e;
+  max-width: none;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#app:fullscreen header,
+#app:-webkit-full-screen header {
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+#app:fullscreen h1,
+#app:-webkit-full-screen h1 {
+  display: none;
+}
+
+#app:fullscreen main,
+#app:-webkit-full-screen main {
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: 1fr 300px;
+}
+
+#app:fullscreen #score-container,
+#app:-webkit-full-screen #score-container {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+#app:fullscreen #analysis-panel,
+#app:-webkit-full-screen #analysis-panel {
+  max-height: none;
+  overflow-y: auto;
 }
 
 @media (max-width: 900px) {

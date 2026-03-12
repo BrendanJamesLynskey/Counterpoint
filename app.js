@@ -19,6 +19,8 @@
   const stopBtn = document.getElementById('stop-btn');
   const generateBtn = document.getElementById('generate-btn');
   const continuousChk = document.getElementById('continuous');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  const appEl = document.getElementById('app');
   const canvas = document.getElementById('score-canvas');
 
   // Analysis DOM
@@ -47,6 +49,29 @@
 
   keySel.addEventListener('change', () => { stopPlayback(); generatePiece(); });
   voicesSel.addEventListener('change', () => { stopPlayback(); generatePiece(); });
+
+  // Fullscreen toggle
+  fullscreenBtn.addEventListener('click', () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      (appEl.requestFullscreen || appEl.webkitRequestFullscreen).call(appEl);
+    }
+  });
+
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+  function onFullscreenChange() {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    fullscreenBtn.textContent = isFs ? '\u00D7' : '\u26F6';
+    fullscreenBtn.title = isFs ? 'Exit full screen' : 'Full screen';
+    // Re-render after layout settles
+    setTimeout(() => {
+      ScoreRenderer.resize();
+      if (piece) ScoreRenderer.render(piece, currentBeat);
+    }, 100);
+  }
 
   function generatePiece() {
     const key = keySel.value;
