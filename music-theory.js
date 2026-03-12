@@ -61,8 +61,56 @@ const MusicTheory = (() => {
     return { note, octave, full: `${note}${octave}` };
   }
 
+  // ── Tuning systems ───────────────────────────────────────────────
+  // Each tuning defines cent offsets from equal temperament for each
+  // pitch class (C=0 through B=11).  A440 is the reference pitch.
+
+  let currentTuning = 'equal';
+
+  const TUNINGS = {
+    'equal': {
+      name: 'Equal Temperament',
+      offsets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    },
+    'just-major': {
+      name: 'Just Intonation (Major)',
+      // C=1/1, D=9/8, E=5/4, F=4/3, G=3/2, A=5/3, B=15/8
+      // Cents from ET: 0, 0, +3.91, -13.69, -0.00, +1.96, +15.64, -13.69, 0, -15.64, +17.60, -11.73
+      offsets: [0, 0, 3.91, -15.64, -13.69, -1.96, 0, 1.96, -13.69, -15.64, 17.60, -11.73]
+    },
+    'pythagorean': {
+      name: 'Pythagorean',
+      // Built on pure fifths (3:2). Cents from ET:
+      // C=0, C#=-9.78, D=+3.91, Eb=-5.87, E=+7.82, F=-1.96,
+      // F#=+11.73, G=+1.96, G#=-7.82, A=+5.87, Bb=-3.91, B=+9.78
+      offsets: [0, -9.78, 3.91, -5.87, 7.82, -1.96, 11.73, 1.96, -7.82, 5.87, -3.91, 9.78]
+    },
+    'meantone': {
+      name: 'Quarter-Comma Meantone',
+      // Pure major thirds (5:4), tempered fifths. Cents from ET:
+      offsets: [0, -24.04, -6.84, 10.26, -13.69, 3.42, -20.53, -3.42, -27.37, -10.26, 6.84, -17.11]
+    },
+    'werckmeister': {
+      name: 'Werckmeister III',
+      // Well temperament (1691). Cents from ET:
+      offsets: [0, -9.78, -7.82, -5.87, -3.91, -1.96, -9.78, -3.91, -7.82, -5.87, -3.91, -1.96]
+    },
+    'kirnberger': {
+      name: 'Kirnberger III',
+      // Well temperament blending just and Pythagorean. Cents from ET:
+      offsets: [0, -9.78, -6.84, -5.87, -13.69, -1.96, -9.78, -3.91, -7.82, -10.26, -3.91, -11.73]
+    }
+  };
+
+  function setTuning(name) {
+    if (TUNINGS[name]) currentTuning = name;
+  }
+
   function midiToFrequency(midi) {
-    return 440 * Math.pow(2, (midi - 69) / 12);
+    const offsets = TUNINGS[currentTuning].offsets;
+    const pc = ((midi % 12) + 12) % 12;
+    const cents = offsets[pc];
+    return 440 * Math.pow(2, (midi - 69) / 12 + cents / 1200);
   }
 
   function parseKey(keyStr) {
@@ -197,6 +245,7 @@ const MusicTheory = (() => {
     noteNameToMidi, midiToNoteName, midiToFrequency, parseKey,
     getScalePitches, getScaleTonesInRange, getScaleDegree,
     intervalBetween, motionType,
-    midiToDiatonic, getNoteAccidental, getKeySigInfo
+    midiToDiatonic, getNoteAccidental, getKeySigInfo,
+    TUNINGS, setTuning
   };
 })();

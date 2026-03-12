@@ -19,6 +19,7 @@
   const stepBtn = document.getElementById('step-btn');
   const stopBtn = document.getElementById('stop-btn');
   const generateBtn = document.getElementById('generate-btn');
+  const tuningSel = document.getElementById('tuning');
   const continuousChk = document.getElementById('continuous');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   const appEl = document.getElementById('app');
@@ -51,6 +52,7 @@
 
   keySel.addEventListener('change', () => { stopPlayback(); generatePiece(); });
   voicesSel.addEventListener('change', () => { stopPlayback(); generatePiece(); });
+  tuningSel.addEventListener('change', () => { MusicTheory.setTuning(tuningSel.value); });
 
   // Fullscreen toggle — use Fullscreen API where available, fall back to CSS class
   let isFullscreen = false;
