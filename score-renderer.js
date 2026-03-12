@@ -82,8 +82,8 @@ const ScoreRenderer = (() => {
   const BASS_ASPECT   = 6200 / 7100;
 
   // Tunable parameters (size = multiplier of 4*GAP, yOff = GAPs from staff top)
-  const TREBLE_SIZE = 2.4;
-  const TREBLE_Y = -0.8;   // image top, in GAPs from staff top (moved down to put curl on G line)
+  const TREBLE_SIZE = 1.2;
+  const TREBLE_Y = 0.1;    // image top, in GAPs from staff top (adjusted for smaller size)
   const TREBLE_X = 0.15;   // image left, as fraction of image width right of clefX
 
   const BASS_SIZE = 0.6;
