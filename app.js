@@ -50,28 +50,82 @@
   keySel.addEventListener('change', () => { stopPlayback(); generatePiece(); });
   voicesSel.addEventListener('change', () => { stopPlayback(); generatePiece(); });
 
-  // Fullscreen toggle
+  // Fullscreen toggle — use Fullscreen API where available, fall back to CSS class
+  let isFullscreen = false;
+
   fullscreenBtn.addEventListener('click', () => {
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    if (isFullscreen) {
+      exitFs();
     } else {
-      (appEl.requestFullscreen || appEl.webkitRequestFullscreen).call(appEl);
+      enterFs();
     }
   });
 
-  document.addEventListener('fullscreenchange', onFullscreenChange);
-  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+  function enterFs() {
+    // Try native Fullscreen API first
+    if (appEl.requestFullscreen) {
+      appEl.requestFullscreen().catch(() => cssFallbackEnter());
+    } else if (appEl.webkitRequestFullscreen) {
+      appEl.webkitRequestFullscreen();
+    } else {
+      cssFallbackEnter();
+    }
+    // Native fullscreen updates state via the event listener below.
+    // For browsers that support it, the class is added in the event handler.
+    // The CSS fallback path handles it directly.
+  }
 
-  function onFullscreenChange() {
-    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    fullscreenBtn.textContent = isFs ? '\u00D7' : '\u26F6';
-    fullscreenBtn.title = isFs ? 'Exit full screen' : 'Full screen';
-    // Re-render after layout settles
+  function exitFs() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else {
+      cssFallbackExit();
+    }
+  }
+
+  function cssFallbackEnter() {
+    appEl.classList.add('app-fullscreen');
+    setFsState(true);
+  }
+
+  function cssFallbackExit() {
+    appEl.classList.remove('app-fullscreen');
+    setFsState(false);
+  }
+
+  function setFsState(fs) {
+    isFullscreen = fs;
+    fullscreenBtn.textContent = fs ? '\u00D7' : '\u26F6';
+    fullscreenBtn.title = fs ? 'Exit full screen' : 'Full screen';
+    document.body.style.overflow = fs ? 'hidden' : '';
     setTimeout(() => {
       ScoreRenderer.resize();
       if (piece) ScoreRenderer.render(piece, currentBeat);
-    }, 100);
+    }, 50);
   }
+
+  // Listen for native fullscreen events
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+
+  function onFsChange() {
+    const nativeFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (nativeFs) {
+      appEl.classList.add('app-fullscreen');
+      setFsState(true);
+    } else {
+      appEl.classList.remove('app-fullscreen');
+      setFsState(false);
+    }
+  }
+
+  // Escape key exits CSS-only fullscreen
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
+      cssFallbackExit();
+    }
+  });
 
   function generatePiece() {
     const key = keySel.value;

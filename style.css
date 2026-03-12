@@ -263,44 +263,43 @@ main {
 
 /* ── Fullscreen mode ────────────────────────────────── */
 
-#app:fullscreen,
-#app:-webkit-full-screen {
+.app-fullscreen {
   background: #1a1a2e;
-  max-width: none;
+  max-width: none !important;
   padding: 12px 20px;
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 9999;
 }
 
-#app:fullscreen header,
-#app:-webkit-full-screen header {
+.app-fullscreen header {
   margin-bottom: 10px;
   flex-shrink: 0;
 }
 
-#app:fullscreen h1,
-#app:-webkit-full-screen h1 {
+.app-fullscreen h1 {
   display: none;
 }
 
-#app:fullscreen main,
-#app:-webkit-full-screen main {
+.app-fullscreen main {
   flex: 1;
   min-height: 0;
   grid-template-columns: 1fr 300px;
 }
 
-#app:fullscreen #score-container,
-#app:-webkit-full-screen #score-container {
+.app-fullscreen #score-container {
   height: auto;
   flex: 1;
   min-height: 0;
 }
 
-#app:fullscreen #analysis-panel,
-#app:-webkit-full-screen #analysis-panel {
+.app-fullscreen #analysis-panel {
   max-height: none;
   overflow-y: auto;
 }
