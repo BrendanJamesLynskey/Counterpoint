@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counterpoint Player</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero {
+      max-width: 760px;
+      padding: 60px 24px 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      color: #e8d5b7;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #a0a0b8;
+      margin-bottom: 36px;
+    }
+
+    .launch-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: #2d6a4f;
+      color: #e8d5b7;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+    .launch-btn:hover { background: #40916c; transform: translateY(-1px); }
+    .launch-btn:active { transform: translateY(0); }
+
+    .features {
+      max-width: 760px;
+      padding: 0 24px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .feature {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .feature h3 {
+      color: #e8d5b7;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .feature p {
+      color: #a0a0b8;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .how-it-works {
+      max-width: 760px;
+      padding: 0 24px 50px;
+    }
+
+    .how-it-works h2 {
+      color: #e8d5b7;
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .how-it-works p {
+      color: #a0a0b8;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    footer {
+      padding: 30px 24px;
+      text-align: center;
+      color: #555;
+      font-size: 0.85rem;
+      border-top: 1px solid #0f3460;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    footer a {
+      color: #a0a0b8;
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .features { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Counterpoint Player</h1>
+    <p class="subtitle">Randomly generated polyphonic music following the rules of species counterpoint, played and analysed in real time.</p>
+    <a href="app.html" class="launch-btn">Open the Player</a>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <h3>Rule-based generation</h3>
+      <p>2&ndash;4 voice counterpoint with consonant intervals, no parallel fifths or octaves, contrary motion, stepwise melodies, leap recovery, and proper cadences.</p>
+    </div>
+    <div class="feature">
+      <h3>6 instruments</h3>
+      <p>Piano, Harpsichord, Church Organ, Baroque Organ, Reed Organ, and Flute Organ &mdash; all synthesized live with the Web Audio API.</p>
+    </div>
+    <div class="feature">
+      <h3>Score notation</h3>
+      <p>Canvas-rendered staves with clefs, key signatures, time signatures, bar lines, diatonic note placement, accidentals, ledger lines, ties, and a moving playhead.</p>
+    </div>
+    <div class="feature">
+      <h3>Live analysis</h3>
+      <p>Scale degrees, interval quality, cadence detection (PAC, IAC, HC, plagal, deceptive), voice motion types, and counterpoint rule-checking updated on every beat.</p>
+    </div>
+    <div class="feature">
+      <h3>12 keys</h3>
+      <p>Major and minor keys with correct key signatures and harmonic-minor raised leading tones at cadences.</p>
+    </div>
+    <div class="feature">
+      <h3>Continuous mode</h3>
+      <p>Check one box and the music plays indefinitely, generating new pieces seamlessly at the end of each one.</p>
+    </div>
+  </div>
+
+  <div class="how-it-works">
+    <h2>How it works</h2>
+    <p>
+      The bass voice is generated first as a cantus firmus with variable note durations.
+      Upper voices are layered on top, each note scored against harmonic and melodic constraints
+      and the best candidate chosen. The result is played through additive/subtractive
+      synthesizers built entirely from Web Audio oscillators, filters, and envelopes.
+      No samples, no libraries &mdash; pure browser-native synthesis.
+    </p>
+  </div>
+
+  <footer>
+    <a href="https://github.com/BrendanJamesLynskey/Counterpoint">View source on GitHub</a>
+  </footer>
+</body>
+</html>

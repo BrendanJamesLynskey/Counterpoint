@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counterpoint Player</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Counterpoint Player</h1>
+      <div class="controls">
+        <div class="control-group">
+          <label for="instrument">Instrument</label>
+          <select id="instrument">
+            <option value="piano">Piano</option>
+            <option value="harpsichord">Harpsichord</option>
+            <option value="church-organ">Church Organ</option>
+            <option value="baroque-organ">Baroque Organ</option>
+            <option value="reed-organ">Reed Organ</option>
+            <option value="flute-organ">Flute Organ</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="key-select">Key</label>
+          <select id="key-select">
+            <option value="C">C major</option>
+            <option value="D">D major</option>
+            <option value="E">E major</option>
+            <option value="F">F major</option>
+            <option value="G">G major</option>
+            <option value="A">A major</option>
+            <option value="Bb">B&#9837; major</option>
+            <option value="Cm">C minor</option>
+            <option value="Dm">D minor</option>
+            <option value="Am">A minor</option>
+            <option value="Em">E minor</option>
+            <option value="Gm">G minor</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="voices">Voices</label>
+          <select id="voices">
+            <option value="2">2 (Cantus + 1)</option>
+            <option value="3" selected>3 (Cantus + 2)</option>
+            <option value="4">4 (Cantus + 3)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="tempo">Tempo: <span id="tempo-display">72</span> BPM</label>
+          <input type="range" id="tempo" min="30" max="160" value="72">
+        </div>
+        <div class="control-group">
+          <label for="continuous" class="toggle-label">
+            <input type="checkbox" id="continuous">
+            Continuous
+          </label>
+        </div>
+        <div class="control-group buttons">
+          <button id="play-btn" class="btn btn-play">&#9654; Play</button>
+          <button id="stop-btn" class="btn btn-stop" disabled>&#9632; Stop</button>
+          <button id="generate-btn" class="btn btn-generate">&#8635; New Piece</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="score-container">
+        <canvas id="score-canvas"></canvas>
+      </div>
+      <div id="analysis-panel">
+        <h2>Analysis</h2>
+        <div id="current-beat" class="analysis-section">
+          <h3>Current Beat</h3>
+          <div id="beat-info"></div>
+        </div>
+        <div id="interval-analysis" class="analysis-section">
+          <h3>Intervals</h3>
+          <div id="interval-info"></div>
+        </div>
+        <div id="cadence-analysis" class="analysis-section">
+          <h3>Cadence</h3>
+          <div id="cadence-info"></div>
+        </div>
+        <div id="motion-analysis" class="analysis-section">
+          <h3>Voice Motion</h3>
+          <div id="motion-info"></div>
+        </div>
+        <div id="rule-analysis" class="analysis-section">
+          <h3>Counterpoint Rules</h3>
+          <div id="rule-info"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="music-theory.js"></script>
+  <script src="counterpoint.js"></script>
+  <script src="instruments.js"></script>
+  <script src="score-renderer.js"></script>
+  <script src="analysis.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
