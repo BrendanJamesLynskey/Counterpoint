@@ -55,66 +55,115 @@ const ScoreRenderer = (() => {
   // ── draw helpers ──────────────────────────────────────────────────
 
   function drawTrebleClef(x, staffTopY) {
-    // Simplified treble clef: vertical line + upper arc + lower arc + dot
     const g = GAP;
     ctx.save();
-    ctx.strokeStyle = '#555';
-    ctx.fillStyle = '#555';
-    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = '#444';
+    ctx.fillStyle = '#444';
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // Vertical stroke
+    // Draw the treble clef as a continuous bezier path
+    // G line is at staffTopY + 3*g (second staff line from bottom)
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
-    ctx.moveTo(x, staffTopY - g * 0.8);
-    ctx.lineTo(x, staffTopY + g * 4.8);
+
+    // Start from the bottom curl, below the staff
+    ctx.moveTo(x + g * 0.15, staffTopY + g * 5.0);
+
+    // Bottom curl: sweep left and up
+    ctx.bezierCurveTo(
+      x - g * 0.7, staffTopY + g * 4.9,
+      x - g * 0.65, staffTopY + g * 4.0,
+      x + g * 0.05, staffTopY + g * 3.7
+    );
+
+    // Rise up through the right side of the staff
+    ctx.bezierCurveTo(
+      x + g * 0.9, staffTopY + g * 3.2,
+      x + g * 1.1, staffTopY + g * 1.8,
+      x + g * 0.7, staffTopY + g * 0.4
+    );
+
+    // Curve over the top of the staff
+    ctx.bezierCurveTo(
+      x + g * 0.3, staffTopY - g * 0.5,
+      x - g * 0.7, staffTopY - g * 0.2,
+      x - g * 0.55, staffTopY + g * 0.8
+    );
+
+    // Descend back through the left side, crossing G line
+    ctx.bezierCurveTo(
+      x - g * 0.35, staffTopY + g * 1.7,
+      x + g * 0.1, staffTopY + g * 2.5,
+      x + g * 0.1, staffTopY + g * 3.0
+    );
+
     ctx.stroke();
 
-    // Upper arc (right side, lines 3-5 area)
+    // Vertical spine from top crossing down through the staff
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.arc(x + g * 0.4, staffTopY + g * 0.8, g * 1.35,
-      -Math.PI * 0.85, Math.PI * 0.15);
+    ctx.moveTo(x + g * 0.1, staffTopY + g * 3.0);
+    ctx.lineTo(x + g * 0.1, staffTopY + g * 4.85);
     ctx.stroke();
 
-    // Lower arc (left side, lines 1-3 area)
+    // Vertical line extending above the top of the staff
     ctx.beginPath();
-    ctx.arc(x - g * 0.3, staffTopY + g * 3.0, g * 1.2,
-      Math.PI * 0.15, -Math.PI * 0.85, true);
+    ctx.moveTo(x + g * 0.35, staffTopY + g * 0.2);
+    ctx.lineTo(x + g * 0.35, staffTopY - g * 0.7);
     ctx.stroke();
 
     // Bottom dot
     ctx.beginPath();
-    ctx.arc(x, staffTopY + g * 5.05, 2.5, 0, Math.PI * 2);
+    ctx.arc(x + g * 0.1, staffTopY + g * 5.0, 2.2, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.restore();
   }
 
   function drawBassClef(x, staffTopY) {
     const g = GAP;
     ctx.save();
-    ctx.strokeStyle = '#555';
-    ctx.fillStyle = '#555';
-    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = '#444';
+    ctx.fillStyle = '#444';
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
 
-    // Main dot on F line (line 4 = staffTopY + g)
+    // Main dot on F line (4th line = staffTopY + g)
     ctx.beginPath();
-    ctx.arc(x, staffTopY + g, 3, 0, Math.PI * 2);
+    ctx.arc(x, staffTopY + g * 0.9, g * 0.38, 0, Math.PI * 2);
     ctx.fill();
 
-    // Curve from F line going right and down
+    // Body curve: from F line area sweeping right and down
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
-    ctx.arc(x + g * 0.2, staffTopY + g * 2.2, g * 1.6,
-      -Math.PI * 0.7, Math.PI * 0.15);
+    ctx.moveTo(x + g * 0.4, staffTopY + g * 0.5);
+
+    // Curve up and right toward top of staff
+    ctx.bezierCurveTo(
+      x + g * 0.9, staffTopY - g * 0.2,
+      x + g * 1.4, staffTopY + g * 0.3,
+      x + g * 1.3, staffTopY + g * 1.2
+    );
+
+    // Curve down and back toward bottom
+    ctx.bezierCurveTo(
+      x + g * 1.2, staffTopY + g * 2.3,
+      x + g * 0.5, staffTopY + g * 3.2,
+      x - g * 0.2, staffTopY + g * 3.8
+    );
+
     ctx.stroke();
 
-    // Two dots (colon) flanking the F line
+    // Two dots flanking the F line
+    const dotR = 1.7;
     ctx.beginPath();
-    ctx.arc(x + g * 1.3, staffTopY + g * 0.5, 1.8, 0, Math.PI * 2);
+    ctx.arc(x + g * 1.5, staffTopY + g * 0.5, dotR, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(x + g * 1.3, staffTopY + g * 1.5, 1.8, 0, Math.PI * 2);
+    ctx.arc(x + g * 1.5, staffTopY + g * 1.5, dotR, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.restore();
   }
 
@@ -200,7 +249,7 @@ const ScoreRenderer = (() => {
     const staffHeight = 4 * GAP;
     // Compute spacing to fit the canvas
     const availH = h - marginTop - 20;
-    const staffSpacing = Math.min(availH / numVoices, staffHeight + 65);
+    const staffSpacing = Math.min(availH / numVoices, staffHeight + 55);
 
     const noteAreaLeft = prefixW + 6;
     const noteAreaRight = w - marginRight;
@@ -376,11 +425,11 @@ const ScoreRenderer = (() => {
         const degree = MusicTheory.getScaleDegree(piece.key, midi);
         ctx.save();
         ctx.fillStyle = active ? '#c4a87a' : '#999';
-        ctx.font = '9px sans-serif';
+        ctx.font = '8px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(noteInfo.full, x, staffBottomY + 5);
-        if (degree) ctx.fillText(degree.name, x, staffBottomY + 16);
+        ctx.fillText(noteInfo.full, x, staffBottomY + 4);
+        if (degree) ctx.fillText(degree.name, x, staffBottomY + 14);
         ctx.restore();
       }
     }
