@@ -76,22 +76,34 @@ const ScoreRenderer = (() => {
 
   // ── draw helpers ──────────────────────────────────────────────────
 
+  // Clef SVG alignment parameters (SVG-coordinate values)
+  const TREBLE = {
+    vbX: 100, vbY: -700, vbW: 920, vbH: 2600,
+    staffTop: 200, staffH: 900, anchorX: 500
+  };
+  const BASS = {
+    vbX: 1400, vbY: 400, vbW: 6200, vbH: 7100,
+    staffTop: 2578, staffH: 8606, anchorX: 2000
+  };
+
   function drawTrebleClef(x, staffTopY) {
     if (!clefsLoaded) return;
-    // SVG viewBox: 26×86, staff occupies y=15..55 (height 40)
-    const scale = (4 * GAP) / 40;
+    const C = TREBLE;
+    const scale = (4 * GAP) / C.staffH;
     ctx.drawImage(trebleClefImg,
-      x - 13 * scale, staffTopY - 15 * scale,
-      26 * scale, 86 * scale);
+      x - (C.anchorX - C.vbX) * scale,
+      staffTopY - (C.staffTop - C.vbY) * scale,
+      C.vbW * scale, C.vbH * scale);
   }
 
   function drawBassClef(x, staffTopY) {
     if (!clefsLoaded) return;
-    // SVG viewBox: 30×48, staff occupies y=4..44 (height 40)
-    const scale = (4 * GAP) / 40;
+    const C = BASS;
+    const scale = (4 * GAP) / C.staffH;
     ctx.drawImage(bassClefImg,
-      x - 6 * scale, staffTopY - 4 * scale,
-      30 * scale, 48 * scale);
+      x - (C.anchorX - C.vbX) * scale,
+      staffTopY - (C.staffTop - C.vbY) * scale,
+      C.vbW * scale, C.vbH * scale);
   }
 
   function drawKeySig(startX, staffTopY, clef, keySig) {
@@ -170,7 +182,7 @@ const ScoreRenderer = (() => {
     const marginRight = 20;
     const marginTop = 28;
     const labelW = 28;
-    const clefW = 26;
+    const clefW = 40;
     const timeSigW = 18;
     const prefixW = labelW + clefW + keySigWidth + timeSigW + 10;
     const staffHeight = 4 * GAP;
